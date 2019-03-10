@@ -1,0 +1,96 @@
+Только в ../../bigbrother/src/: bigbrother
+Только в ../../bigbrother/src/: bigbrother-ConfigFile.o
+Только в ../../bigbrother/src/: bigbrother-DataTransfer.o
+Только в ../../bigbrother/src/: bigbrother-devicemodbus.o
+Только в ../../bigbrother/src/: bigbrother-device.o
+Только в ../../bigbrother/src/: bigbrother-devicerecorder.o
+Только в ../../bigbrother/src/: bigbrother-globals.o
+Только в ../../bigbrother/src/: bigbrother-gpio.o
+Только в ../../bigbrother/src/: bigbrother-main.o
+Только в ../../bigbrother/src/: bigbrother-modem.o
+Только в ../../bigbrother/src/: bigbrother-OverflowFile.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusbool.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusenum.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusfloat.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusint.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusjournal.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbus.o
+Только в ../../bigbrother/src/: bigbrother-parametermodbusstr.o
+Только в ../../bigbrother/src/: bigbrother-parameter.o
+Только в ../../bigbrother/src/: bigbrother-port.o
+Только в ../../bigbrother/src/: bigbrother-PostToServer.o
+Только в ../../bigbrother/src/: bigbrother-scada.o
+Только в ../../bigbrother/src/: bigbrother-server.o
+Только в ../../bigbrother/src/: bigbrother-XMLAttribute.o
+diff ./ConfigFile.cpp ../../bigbrother/src/ConfigFile.cpp
+16c16
+< ConfigFile::ConfigFile(string serverAddress):
+---
+> ConfigFile::ConfigFile(string serverAddress, V7Server *server):
+19c19,20
+<         curl(NULL)
+---
+>         curl(NULL),
+>         mpServer(server)
+87a89
+> 		       // mpServer->switchOnNornal();
+diff ./ConfigFile.h ../../bigbrother/src/ConfigFile.h
+25,26c25
+< using namespace std;
+< 
+---
+> #include "server.h"
+33c32
+< 	ConfigFile(string serverAddress);
+---
+> 	ConfigFile(string serverAddress, V7Server *server=0);
+114a114,115
+> 
+>     V7Server *mpServer; // будем переключать в рабочее состояние
+Общие подкаталоги: ./.deps и ../../bigbrother/src/.deps
+Только в .: diff.diff
+diff ./modem.cpp ../../bigbrother/src/modem.cpp
+139a140
+> 
+381c382
+<     Config   = new ConfigFile(mServerAddress);
+---
+>     Config   = new ConfigFile(mServerAddress, mpServer);
+398c399
+<         mpServer->switchMode();
+---
+>         mpServer->switchOnStandalone();
+429a431
+> 
+diff ./PostToServer.cpp ../../bigbrother/src/PostToServer.cpp
+680,682c680,681
+< 			if (mpServer->getMode() == NORMAL) {
+< 			    mpServer->switchMode();
+< 			}
+---
+> 			if(mpServer->getMode() == NORMAL)
+> 			    mpServer->switchOnStandalone();
+889c888,889
+< 				system("reboot");//перезагружаю модем
+---
+> //				system("reboot");//перезагружаю модем
+> 				cout << "\n rebooted \n" << endl;
+diff ./server.cpp ../../bigbrother/src/server.cpp
+250,251c250,255
+< void V7Server::switchMode(){
+<     mMode = NORMAL? STANDALONE: NORMAL;
+---
+> void V7Server::switchOnNornal(){
+>     mMode = NORMAL;
+> }
+> 
+> void V7Server::switchOnStandalone(){
+>     mMode = STANDALONE;
+diff ./server.h ../../bigbrother/src/server.h
+169c169
+<     void switchMode();
+---
+> 
+170a171,172
+>     void switchOnNornal();
+>     void switchOnStandalone();
